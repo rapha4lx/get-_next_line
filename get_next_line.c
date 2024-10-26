@@ -13,24 +13,6 @@ int     ft_strlen(const char *str)
     return (i);
 }
 
-// char    *ft_strdup(const char *str, int start, int size)
-// {
-//     char    *buff;
-//     int     b_s;
-
-//     b_s = ft_strlen(str);
-//     buff = (char*)malloc(sizeof(char) * (b_s + 1));
-//     if (!b_s);
-//         return (0);
-//     while (buff[b_s])
-//     {
-//         buff[b_s] = str[b_s];
-//         b_s++;
-//     }
-//     buff[b_s] = '\0';
-//     return (buff);
-// }
-
 char    *ft_strdup(const char *str, int start, int size)
 {
     char    *buff;
@@ -85,54 +67,67 @@ int     process_line(int fd, char *buff, t_line **head)
 
     if (!read(fd, buff, BUFFER_SIZE))
         return (0);
-    i = ft_strchr(buff, '\n');
-    if (i >= BUFFER_SIZE)
+    // i = ft_strchr(buff, '\n');
+    i = ft_strlen(buff);
+
+    if (ft_strchr(buff, '\n') != BUFFER_SIZE + 1)
     {
-        t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, BUFFER_SIZE)));
-        return (1);
-    }
-    else if (i > 0)
-    {
-        t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, i + 1)));
-        buff += i + 2;
         i = ft_strchr(buff, '\n') + 1;
         t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, i)));
+        while (i > 0 && buff[0] != '\0')
+        {
+            buff += i;
+            i = ft_strchr(buff, '\n') + 1;
+            if (i > 0 && buff[0] != '\0')
+                t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, i)));
+        }
+    }
+    else
+    {
+        t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, i)));
+        return (1);
     }
     return (0);
 }
 
-char    *get_line(t_line **head)
+char    *get_line(t_line **head, char **line)
 {
-    char    *buff;
     char    *temp_buff;
     t_line  *temp;
 
-    buff = NULL;
     while (*head)
     {
-        // if (ft_strchr(buff, '\n'))
-        //     return (buff);
+        if (line && *line && (*line)[ft_strchr(*line, '\n')] == '\n')
+            return (*line);
         temp = (*head)->next;
-        temp_buff = buff;
-        buff = ft_strjoin(buff, (char*)(*head)->content);
+        temp_buff = *line;
+        *line = ft_strjoin(*line, (char*)(*head)->content);
         if (temp_buff)
             free(temp_buff);
         t_line_clear(head);
         *head = temp;
     }
-    return (buff);
+    return (*line);
 }
 
 char *get_next_line(int fd)
 {
     static t_line *head = NULL;
     char    buff[BUFFER_SIZE];
+    char    *line;
 
+    line = NULL;
     if (head)
-        return (get_line(&head));
+    {
+           line = get_line(&head, &line);
+        if (ft_strchr(line, '\n') - 1 == ft_strlen(line))
+            return (line);
+    }
+
     while (process_line(fd, buff, &head))
     {
         // return 
     }
-    return (get_line(&head));
+    line = get_line(&head, &line);
+    return (line);
 }
