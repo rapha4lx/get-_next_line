@@ -9,7 +9,7 @@ int     ft_strchr(const char *str, char c)
     i = 0;
     if (str == NULL)
         return (0);
-    while (str[i])
+    while (str[i] != '\0')
     {
         if (str[i] == c)
             return (i);

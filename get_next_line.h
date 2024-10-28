@@ -14,7 +14,7 @@
 
 typedef struct s_line
 {
-    void    *content;
+    char    *content;
     struct  s_line *next; 
 } t_line;
 

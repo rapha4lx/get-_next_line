@@ -8,7 +8,7 @@ int     ft_strlen(const char *str)
     i = 0;
     if (str == NULL)
         return (0);
-    while (*str++)
+    while (str[i] != '\0')
         i++;
     return (i);
 }
@@ -56,38 +56,34 @@ char  *ft_strjoin(char *s1, char *s2)
             buff[s1_sz + i] = s2[i];
         i++;
     }
-
     buff[s1_sz + s2_sz] = '\0';
     return (buff);
 }
 
 int     process_line(int fd, char *buff, t_line **head)
 {
-    int i;
-
+    int n_count;
+    int b_len;
     if (!read(fd, buff, BUFFER_SIZE))
         return (0);
-    // i = ft_strchr(buff, '\n');
-    i = ft_strlen(buff);
-
-    if (ft_strchr(buff, '\n') != BUFFER_SIZE + 1)
+    n_count = ft_strchr(buff, '\n');
+    b_len = ft_strlen(buff);
+    if (n_count < b_len)
     {
-        i = ft_strchr(buff, '\n') + 1;
-        t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, i)));
-        while (i > 0 && buff[0] != '\0')
+        while (n_count <= b_len)
         {
-            buff += i;
-            i = ft_strchr(buff, '\n') + 1;
-            if (i > 0 && buff[0] != '\0')
-                t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, i)));
+            t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, n_count)));            
+            buff += n_count;
+            n_count = ft_strchr(buff, '\n');
+            if (n_count == 0)
+                n_count++;
+            b_len = ft_strlen(buff);
         }
+        // t_line_add_back(head, t_line_new_line(ft_strdup(buff, n_count + 1, b_len - n_count)));
+        return (0);
     }
-    else
-    {
-        t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, i)));
-        return (1);
-    }
-    return (0);
+    t_line_add_back(head, t_line_new_line(ft_strdup(buff, 0, b_len)));    
+    return (1);
 }
 
 char    *get_line(t_line **head, char **line)
@@ -119,11 +115,10 @@ char *get_next_line(int fd)
     line = NULL;
     if (head)
     {
-           line = get_line(&head, &line);
-        if (ft_strchr(line, '\n') - 1 == ft_strlen(line))
+        line = get_line(&head, &line);
+        if (ft_strchr(line, '\n') < ft_strlen(line))
             return (line);
     }
-
     while (process_line(fd, buff, &head))
     {
         // return 
