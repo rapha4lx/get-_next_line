@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rferro-d <rferro-d@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/29 19:04:53 by rferro-d          #+#    #+#             */
-/*   Updated: 2024/10/29 19:04:56 by rferro-d         ###   ########.fr       */
+/*   Updated: 2024/10/29 19:29:44 by rferro-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static int	ft_strlen(const char *str)
 {
@@ -104,26 +104,26 @@ char	*get_next_line(int fd)
 	char			buff[BUFFER_SIZE + 1];
 	char			*line;
 	int				i;
-	static t_line	*head = NULL;
+	static t_line	*head[FD_MAX] = {NULL};
 
 	i = -1;
 	line = NULL;
 	while (BUFFER_SIZE >= ++i)
 		buff[i] = '\0';
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd >= FD_MAX)
 		return (NULL);
-	if (head)
+	if (head[fd])
 	{
-		line = get_line(&head, &line);
+		line = get_line(&head[fd], &line);
 		if (ft_strchr(line, '\n') < ft_strlen(line))
 			return (line);
 	}
-	while (process_line(fd, buff, &head))
+	while (process_line(fd, buff, &head[fd]))
 	{
 		i = -1;
 		while (BUFFER_SIZE >= ++i)
 			buff[i] = '\0';
 	}
-	line = get_line(&head, &line);
+	line = get_line(&head[fd], &line);
 	return (line);
 }
